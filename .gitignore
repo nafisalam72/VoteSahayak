@@ -1,2 +1,32 @@
-node_modules
-node_modules
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
+
+# ─── Build Output ─────────────────────────────────────────────────────────────
+# IMPORTANT: Never commit the dist folder — it may contain baked-in env vars
+dist/
+dist
+
+# ─── Environment / Secrets ───────────────────────────────────────────────────
+# .env holds your real API keys — NEVER commit this
+.env
+.env.local
+.env.*.local
+
+# .env.example is safe to commit (contains no real keys)
+# !.env.example
+
+# ─── Python / Streamlit ───────────────────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+.streamlit/secrets.toml
+
+# ─── IDE & OS ─────────────────────────────────────────────────────────────────
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+*.log
+npm-debug.log*

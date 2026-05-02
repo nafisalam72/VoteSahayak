@@ -1,4 +1,4 @@
-
+/// <reference types="vitest" />
 import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
@@ -43,4 +43,18 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  // ---------------------------------------------------------------------------
+  // Vitest configuration
+  // ---------------------------------------------------------------------------
+  test: {
+    /** Use a real DOM environment so React Testing Library can mount components. */
+    environment: 'jsdom',
+    /** Make Vitest globals (describe, it, expect, vi) available without imports. */
+    globals: true,
+    /** Import jest-dom matchers and any other global test setup. */
+    setupFiles: './src/test/setup.ts',
+    /** Exclude node_modules and dist from test discovery. */
+    exclude: ['node_modules', 'dist'],
+  },
 })

@@ -29,50 +29,50 @@
 ## 🏗️ Architecture Diagram
 
 ```mermaid
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#FF9933', 'primaryTextColor': '#ffffff', 'primaryBorderColor': '#FF9933', 'lineColor': '#a0aec0', 'secondaryColor': '#046A38', 'tertiaryColor': '#1a202c', 'background': '#0d1117', 'mainBkg': '#1e2530', 'nodeBorder': '#FF9933', 'clusterBkg': '#161b22', 'titleColor': '#ffffff', 'edgeLabelBackground': '#1e2530', 'fontFamily': 'Inter, sans-serif'}}}%%
 graph TB
-    subgraph Client["🖥️ Client Layer (React + TypeScript)"]
-        UI[Vite + React 18 SPA]
-        TW[Tailwind CSS v4]
-        Router[React Router v7]
-        Motion[Framer Motion]
-
+    subgraph Client["CLIENT LAYER — React + TypeScript"]
+        UI["Vite + React 18 SPA"]
+        TW["Tailwind CSS v4"]
+        Router["React Router v7"]
+        Motion["Framer Motion"]
         UI --> Router
         UI --> TW
         UI --> Motion
     end
 
-    subgraph Pages["📄 Pages / Routes"]
-        Journey["/  →  Voter Journey"]
-        Locator["/locator  →  Station Locator"]
-        Timeline["/timeline  →  Election Timeline"]
-        Candidates["/candidates  →  Candidate Info"]
-        Education["/education  →  Voter Education"]
-        Quiz["/quiz  →  Knowledge Quiz"]
-        Chat["/chat  →  AI Sahayak Chat"]
-        Support["/support  →  Help & Support"]
+    subgraph Pages["PAGES / ROUTES"]
+        Journey["/  Voter Journey"]
+        Locator["/locator  Station Locator"]
+        Timeline["/timeline  Election Timeline"]
+        Candidates["/candidates  Candidate Info"]
+        Education["/education  Voter Education"]
+        Quiz["/quiz  Knowledge Quiz"]
+        Chat["/chat  AI Sahayak Chat"]
+        Support["/support  Help and Support"]
     end
 
-    subgraph Backend["⚙️ Backend Layer (Python + Streamlit)"]
-        Flask[app.py — Streamlit App]
-        Folium[Folium — Interactive Maps]
-        JSPDF[jsPDF — Certificate Generator]
+    subgraph Backend["BACKEND — Python + Streamlit"]
+        Flask["app.py — Streamlit App"]
+        Folium["Folium — Interactive Maps"]
+        JSPDF["jsPDF — Certificate Generator"]
     end
 
-    subgraph AI["🤖 AI Layer"]
-        Groq[Groq API]
-        Llama["LLaMA 3.3 70B (React)\nLLaMA 3.1 8B (Streamlit)"]
+    subgraph AI["AI LAYER"]
+        Groq["Groq API"]
+        Llama["LLaMA 3.3 70B — React Frontend\nLLaMA 3.1 8B — Streamlit Backend"]
         Groq --> Llama
     end
 
-    subgraph Infra["☁️ Infrastructure"]
-        Docker[Docker Container]
-        GCR[Google Cloud Run]
+    subgraph Infra["INFRASTRUCTURE"]
+        Docker["Docker Container"]
+        GCR["Google Cloud Run"]
         Docker --> GCR
     end
 
     Router --> Pages
     Chat -->|"REST API"| Groq
-    Flask -->|"Groq OpenAI-Compatible API"| Groq
+    Flask -->|"OpenAI-Compatible API"| Groq
     Backend --> Docker
     Client --> Docker
 ```
@@ -82,29 +82,31 @@ graph TB
 ## 🔄 User Flow Diagram
 
 ```mermaid
-flowchart LR
-    A([👤 User Visits VoteSahayak]) --> B{Choose Section}
+%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#FF9933', 'primaryTextColor': '#ffffff', 'primaryBorderColor': '#FF9933', 'lineColor': '#a0aec0', 'secondaryColor': '#046A38', 'tertiaryColor': '#1a202c', 'background': '#0d1117', 'mainBkg': '#1e2530', 'nodeBorder': '#FF9933', 'clusterBkg': '#161b22', 'titleColor': '#ffffff', 'edgeLabelBackground': '#1e2530', 'fontFamily': 'Inter, sans-serif'}}}%%
+flowchart TD
+    A(["User Visits VoteSahayak"]) --> B{"Choose Section"}
 
-    B --> C[🗳️ Voter Journey]
-    B --> D[📍 Station Locator]
-    B --> E[📅 Election Timeline]
-    B --> F[🧑‍💼 Candidate Info]
-    B --> G[📚 Voter Education]
-    B --> H[🎯 Knowledge Quiz]
-    B --> I[💬 AI Chat]
-    B --> J[🆘 Help & Support]
+    B --> C["Voter Journey"]
+    B --> D["Station Locator"]
+    B --> E["Election Timeline"]
+    B --> F["Candidate Info"]
+    B --> G["Voter Education"]
+    B --> H["Knowledge Quiz"]
+    B --> I["AI Chat"]
+    B --> J["Help and Support"]
 
-    C --> C1[Step-by-step eligibility\nregistration & polling guide]
-    D --> D1[Select district → View\ninteractive Folium map]
-    E --> E1[View key election\ndates & milestones]
-    H --> H1[Answer 5 questions]
-    H1 --> H2{Pass?}
-    H2 -->|Yes| H3[📄 Download PDF Certificate]
-    H2 -->|No| H1
+    C --> C1["Step-by-step guide:\nEligibility, Registration,\nPolling Day, Results"]
+    D --> D1["Select district\nView interactive map\nFind your polling booth"]
+    E --> E1["View key election\ndates and milestones"]
 
-    I --> I1[Type question]
-    I1 --> I2[Groq LLaMA API]
-    I2 --> I3[Contextual AI response]
+    H --> H1["Answer 5 questions"]
+    H1 --> H2{"Pass?"}
+    H2 -->|"Yes - Score >= 3"| H3["Download PDF Certificate"]
+    H2 -->|"No - Try again"| H1
+
+    I --> I1["Type your question"]
+    I1 --> I2["Groq LLaMA API\nllama-3.3-70b-versatile"]
+    I2 --> I3["Contextual AI response\nin real-time"]
 ```
 
 ---

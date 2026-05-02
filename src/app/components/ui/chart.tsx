@@ -78,29 +78,43 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${id}] {
+  const safeChartId = cssIdentifier(id);
+  const css = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
+${prefix} [data-chart=${safeChartId}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
       itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
       itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    return isSafeCssColor(color)
+      ? `  --color-${cssIdentifier(key)}: ${color};`
+      : null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `,
-          )
-          .join("\n"),
-      }}
-    />
-  );
+    )
+    .join("\n");
+
+  return <style>{css}</style>;
 };
+
+function cssIdentifier(value: string) {
+  return value.replace(/[^a-zA-Z0-9_-]/g, "");
+}
+
+function isSafeCssColor(value: string | undefined): value is string {
+  return Boolean(
+    value &&
+      (/^#[0-9a-fA-F]{3,8}$/.test(value) ||
+        /^rgb(a)?\([\d\s.,%]+\)$/.test(value) ||
+        /^hsl(a)?\([\d\s.,%]+\)$/.test(value) ||
+        /^[a-zA-Z]+$/.test(value)),
+  );
+}
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 

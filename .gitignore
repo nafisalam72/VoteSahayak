@@ -1,32 +1,33 @@
-# ─── Dependencies ────────────────────────────────────────────────────────────
+# Dependencies
 node_modules/
 
-# ─── Build Output ─────────────────────────────────────────────────────────────
-# IMPORTANT: Never commit the dist folder — it may contain baked-in env vars
+# Build output
 dist/
-dist
+coverage/
 
-# ─── Environment / Secrets ───────────────────────────────────────────────────
-# .env holds your real API keys — NEVER commit this
+# Environment and secrets
 .env
 .env.local
 .env.*.local
+.streamlit/secrets.toml
+*.pem
+*.key
+service-account*.json
 
-# .env.example is safe to commit (contains no real keys)
-# !.env.example
-
-# ─── Python / Streamlit ───────────────────────────────────────────────────────
+# Python
 __pycache__/
 *.pyc
 *.pyo
-.streamlit/secrets.toml
+.pytest_cache/
 
-# ─── IDE & OS ─────────────────────────────────────────────────────────────────
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editors and OS files
 .vscode/
 .idea/
 .DS_Store
 Thumbs.db
-
-# ─── Logs ────────────────────────────────────────────────────────────────────
-*.log
-npm-debug.log*

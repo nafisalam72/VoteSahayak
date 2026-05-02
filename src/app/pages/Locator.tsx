@@ -12,9 +12,7 @@
 import React, { useState, useCallback } from "react";
 import { motion } from "motion/react";
 import { Map, Search, Navigation2, Info } from "lucide-react";
-
-/** Regex allowing only alphanumeric characters and spaces for EPIC/pincode input. */
-const VALID_INPUT_PATTERN = /^[a-zA-Z0-9\s]+$/;
+import { isValidLocatorQuery, sanitizeLocatorQuery } from "@/lib/security";
 
 /**
  * Polling Station Locator page component.
@@ -39,16 +37,16 @@ export default function Locator() {
   const handleSearch = useCallback(
     (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
-      const trimmed = search.trim();
+      const trimmed = sanitizeLocatorQuery(search);
 
       if (!trimmed) return;
 
-      // Input validation: only allow alphanumeric + spaces
-      if (!VALID_INPUT_PATTERN.test(trimmed)) {
-        setInputError("Please enter a valid EPIC number or pincode (letters and numbers only).");
+      if (!isValidLocatorQuery(trimmed)) {
+        setInputError("Please enter a valid EPIC number or pincode using letters, numbers, spaces, or hyphens.");
         return;
       }
 
+      setSearch(trimmed);
       setInputError(null);
       setIsSearching(true);
       setResult(false);

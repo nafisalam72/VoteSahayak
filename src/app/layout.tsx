@@ -11,7 +11,7 @@
  * via a spring animation and a semi-transparent overlay backdrop.
  */
 
-import React, { useState, useCallback, memo } from "react";
+import React, { Suspense, useEffect, useState, useCallback, memo } from "react";
 import { Outlet, NavLink, useLocation } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -121,6 +121,15 @@ export default function Layout() {
   /** Closes the mobile sidebar overlay. */
   const closeSidebar = useCallback(() => setIsOpen(false), []);
 
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeSidebar();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [closeSidebar]);
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
       {/* Mobile Sidebar Overlay */}
@@ -133,6 +142,7 @@ export default function Layout() {
             onClick={closeSidebar}
             className="fixed inset-0 bg-black/60 z-40 md:hidden"
             aria-hidden="true"
+            data-testid="sidebar-overlay"
           />
         )}
       </AnimatePresence>
@@ -144,6 +154,7 @@ export default function Layout() {
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
         className="fixed inset-y-0 left-0 z-50 w-72 bg-slate-900 border-r border-slate-800 shadow-2xl flex flex-col md:relative md:translate-x-0"
         aria-label="Application sidebar"
+        id="app-sidebar"
       >
         {/* Sidebar header: brand + close button */}
         <div className="flex items-center justify-between p-6 border-b border-slate-800">
@@ -159,6 +170,8 @@ export default function Layout() {
             onClick={closeSidebar}
             className="md:hidden p-2 rounded-lg hover:bg-slate-800 text-slate-400 transition-colors"
             aria-label="Close navigation menu"
+            aria-controls="app-sidebar"
+            aria-expanded={isOpen}
             id="sidebar-close-btn"
           >
             <X className="w-5 h-5" aria-hidden="true" />
@@ -205,6 +218,8 @@ export default function Layout() {
             onClick={openSidebar}
             className="md:hidden p-2 -ml-2 rounded-lg hover:bg-slate-800 text-slate-400 transition-colors"
             aria-label="Open navigation menu"
+            aria-controls="app-sidebar"
+            aria-expanded={isOpen}
             id="sidebar-open-btn"
           >
             <Menu className="w-6 h-6" aria-hidden="true" />
@@ -221,7 +236,11 @@ export default function Layout() {
         </header>
 
         {/* Page content with animated transitions */}
-        <div className="flex-1 overflow-auto overflow-x-hidden p-4 md:p-8">
+        <div
+          className="flex-1 overflow-auto overflow-x-hidden p-4 md:p-8"
+          id="main-content"
+          tabIndex={-1}
+        >
           <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}
@@ -230,7 +249,15 @@ export default function Layout() {
             transition={{ duration: 0.3 }}
             className="max-w-6xl mx-auto h-full"
           >
-            <Outlet />
+            <Suspense
+              fallback={
+                <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center text-slate-300" role="status">
+                  Loading section...
+                </div>
+              }
+            >
+              <Outlet />
+            </Suspense>
           </motion.div>
         </div>
       </main>

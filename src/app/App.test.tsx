@@ -34,15 +34,11 @@ import Journey from "./pages/Journey";
 const mockFetch = vi.fn(() =>
   Promise.resolve({
     ok: true,
+    status: 200,
     json: () =>
       Promise.resolve({
-        choices: [
-          {
-            message: {
-              content: "Namaskar! I can help you with election information.",
-            },
-          },
-        ],
+        reply: "Namaskar! I can help you with election information.",
+        cached: false,
       }),
   })
 );
@@ -230,8 +226,6 @@ describe("Quiz — Question Flow & Scoring", () => {
 describe("Chat — Message Submission & Security", () => {
   beforeEach(() => {
     mockFetch.mockClear();
-    // Set a fake API key so the missing-key branch isn't triggered
-    vi.stubEnv("VITE_GROQ_API_KEY", "test-key-123");
   });
 
   /**
@@ -262,6 +256,14 @@ describe("Chat — Message Submission & Security", () => {
     await user.click(sendBtn);
 
     expect(screen.getByText("What is an EVM?")).toBeInTheDocument();
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/chat",
+        expect.objectContaining({
+          method: "POST",
+        })
+      );
+    });
   });
 
   /**

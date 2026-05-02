@@ -1,15 +1,22 @@
+import { lazy } from "react";
 import { createBrowserRouter } from "react-router";
 import Layout from "./layout";
-import Journey from "./pages/Journey";
-import Locator from "./pages/Locator";
-import Timeline from "./pages/Timeline";
-import Quiz from "./pages/Quiz";
-import Chat from "./pages/Chat";
-import Candidates from "./pages/Candidates";
-import Education from "./pages/Education";
-import Support from "./pages/Support";
+
+const Login = lazy(() => import("./pages/Login"));
+const Journey = lazy(() => import("./pages/Journey"));
+const Locator = lazy(() => import("./pages/Locator"));
+const Timeline = lazy(() => import("./pages/Timeline"));
+const Quiz = lazy(() => import("./pages/Quiz"));
+const Chat = lazy(() => import("./pages/Chat"));
+const Candidates = lazy(() => import("./pages/Candidates"));
+const Education = lazy(() => import("./pages/Education"));
+const Support = lazy(() => import("./pages/Support"));
 
 export const router = createBrowserRouter([
+  {
+    path: "/login",
+    Component: Login,
+  },
   {
     path: "/",
     Component: Layout,

@@ -1,310 +1,158 @@
-<div align="center">
-  <img src="https://img.shields.io/badge/VoteSahayak-Indian%20Election%20Guide-FF9933?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik0xMiAyYTEwIDEwIDAgMSAwIDAgMjAgMTAgMTAgMCAwIDAgMC0yMHptMCAxOGE4IDggMCAxIDEgMC0xNiA4IDggMCAwIDEgMCAxNnoiLz48L3N2Zz4=" />
+# VoteSahayak
 
-  <h1>🗳️ VoteSahayak</h1>
-  <h3><i>Your Comprehensive Guide to the Indian Election Process</i></h3>
+Secure Cloud Run voting-assistance app for Indian election guidance. The production deployment serves the React/Vite UI from a hardened Node.js server (`server.js`) and keeps AI provider secrets on the server side.
 
-  <p>
-    <img src="https://img.shields.io/badge/React-18.3-61DAFB?style=flat-square&logo=react" />
-    <img src="https://img.shields.io/badge/TypeScript-5.5-3178C6?style=flat-square&logo=typescript" />
-    <img src="https://img.shields.io/badge/Python-3.8+-3776AB?style=flat-square&logo=python" />
-    <img src="https://img.shields.io/badge/Tailwind_CSS-v4-06B6D4?style=flat-square&logo=tailwindcss" />
-    <img src="https://img.shields.io/badge/Groq_AI-Llama_3.3-8B3EAB?style=flat-square" />
-    <img src="https://img.shields.io/badge/Streamlit-1.x-FF4B4B?style=flat-square&logo=streamlit" />
-    <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=flat-square&logo=docker" />
-    <img src="https://img.shields.io/badge/GCP-Cloud_Run-4285F4?style=flat-square&logo=googlecloud" />
-  </p>
-</div>
+## What Is Hardened
 
----
+| Criterion | Implementation |
+| --- | --- |
+| Code quality | TypeScript strict mode, centralized utilities, code-split routes, health endpoints, clear scripts |
+| Security | No `VITE_` AI secrets, server-side Groq proxy, Helmet headers, request body limits, input sanitization, per-IP rate limiting |
+| Efficiency | Multi-stage Docker build, production-only runtime dependencies, in-memory AI response cache, lazy-loaded routes, dynamic PDF generation import |
+| Testing | Vitest UI tests, security utility tests, Cloud Run server integration tests with mocked AI provider |
+| Accessibility | Semantic landmarks, skip link, visible focus states, `aria-*` labels, keyboard Escape support for navigation |
+| Google services | Cloud Run-ready server on `PORT`, JSON logs for Cloud Logging, health endpoints for Monitoring, optional Firebase Auth token flow, least-privilege deployment guidance |
 
-## 📌 Overview
+## Architecture
 
-**VoteSahayak** (meaning *"Voting Helper"* in Hindi) is a full-stack, AI-powered civic education platform built to help Indian citizens understand and navigate the democratic election process with confidence. It combines an interactive React frontend with a feature-rich Streamlit backend to deliver step-by-step voter guidance, an AI chat assistant, interactive maps, educational quizzes, and more — all wrapped in a premium, dark-themed UI with Indian tricolor accents.
-
-> Built for the **PromptWars Hackathon**, VoteSahayak demonstrates how AI can empower citizens in a democracy.
-
----
-
-## 🏗️ Architecture Diagram
-
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#FF9933', 'primaryTextColor': '#ffffff', 'primaryBorderColor': '#FF9933', 'lineColor': '#a0aec0', 'secondaryColor': '#046A38', 'tertiaryColor': '#1a202c', 'background': '#0d1117', 'mainBkg': '#1e2530', 'nodeBorder': '#FF9933', 'clusterBkg': '#161b22', 'titleColor': '#ffffff', 'edgeLabelBackground': '#1e2530', 'fontFamily': 'Inter, sans-serif'}}}%%
-graph TB
-    subgraph Client["CLIENT LAYER — React + TypeScript"]
-        UI["Vite + React 18 SPA"]
-        TW["Tailwind CSS v4"]
-        Router["React Router v7"]
-        Motion["Framer Motion"]
-        UI --> Router
-        UI --> TW
-        UI --> Motion
-    end
-
-    subgraph Pages["PAGES / ROUTES"]
-        Journey["/  Voter Journey"]
-        Locator["/locator  Station Locator"]
-        Timeline["/timeline  Election Timeline"]
-        Candidates["/candidates  Candidate Info"]
-        Education["/education  Voter Education"]
-        Quiz["/quiz  Knowledge Quiz"]
-        Chat["/chat  AI Sahayak Chat"]
-        Support["/support  Help and Support"]
-    end
-
-    subgraph Backend["BACKEND — Python + Streamlit"]
-        Flask["app.py — Streamlit App"]
-        Folium["Folium — Interactive Maps"]
-        JSPDF["jsPDF — Certificate Generator"]
-    end
-
-    subgraph AI["AI LAYER"]
-        Groq["Groq API"]
-        Llama["LLaMA 3.3 70B — React Frontend\nLLaMA 3.1 8B — Streamlit Backend"]
-        Groq --> Llama
-    end
-
-    subgraph Infra["INFRASTRUCTURE"]
-        Docker["Docker Container"]
-        GCR["Google Cloud Run"]
-        Docker --> GCR
-    end
-
-    Router --> Pages
-    Chat -->|"REST API"| Groq
-    Flask -->|"OpenAI-Compatible API"| Groq
-    Backend --> Docker
-    Client --> Docker
+```text
+Browser
+  -> React/Vite SPA
+  -> /api/chat on the same Cloud Run service
+  -> Node Express server
+  -> optional Firebase Auth token verification
+  -> Groq API using server-side GROQ_API_KEY
 ```
 
----
+The legacy `app.py` Streamlit app is retained as a safe local fallback, but Cloud Run should deploy the Node server.
 
-## 🔄 User Flow Diagram
-
-```mermaid
-%%{init: {'theme': 'dark', 'themeVariables': {'primaryColor': '#FF9933', 'primaryTextColor': '#ffffff', 'primaryBorderColor': '#FF9933', 'lineColor': '#a0aec0', 'secondaryColor': '#046A38', 'tertiaryColor': '#1a202c', 'background': '#0d1117', 'mainBkg': '#1e2530', 'nodeBorder': '#FF9933', 'clusterBkg': '#161b22', 'titleColor': '#ffffff', 'edgeLabelBackground': '#1e2530', 'fontFamily': 'Inter, sans-serif'}}}%%
-flowchart TD
-    A(["User Visits VoteSahayak"]) --> B{"Choose Section"}
-
-    B --> C["Voter Journey"]
-    B --> D["Station Locator"]
-    B --> E["Election Timeline"]
-    B --> F["Candidate Info"]
-    B --> G["Voter Education"]
-    B --> H["Knowledge Quiz"]
-    B --> I["AI Chat"]
-    B --> J["Help and Support"]
-
-    C --> C1["Step-by-step guide:\nEligibility, Registration,\nPolling Day, Results"]
-    D --> D1["Select district\nView interactive map\nFind your polling booth"]
-    E --> E1["View key election\ndates and milestones"]
-
-    H --> H1["Answer 5 questions"]
-    H1 --> H2{"Pass?"}
-    H2 -->|"Yes - Score >= 3"| H3["Download PDF Certificate"]
-    H2 -->|"No - Try again"| H1
-
-    I --> I1["Type your question"]
-    I1 --> I2["Groq LLaMA API\nllama-3.3-70b-versatile"]
-    I2 --> I3["Contextual AI response\nin real-time"]
-```
-
----
-
-## ✨ Key Features
-
-| Feature | Description | Tech Used |
-|---|---|---|
-| 🗳️ **Voter Journey** | Interactive 6-step guide: eligibility → registration → voter list → EPIC card → polling day → results | React, shadcn/ui |
-| 📍 **Station Locator** | District-level map (Kolkata, Howrah, South 24 Parganas, North 24 Parganas, Hooghly) with searchable booth cards | Folium, Leaflet |
-| 📅 **Election Timeline** | Visual chronological tracker for all key election milestones | React, Motion |
-| 🧑‍💼 **Candidate Info** | Candidate profiles and comparison tool | React |
-| 📚 **Voter Education** | Comprehensive educational resources on EVMs, VVPATs, NOTA, and electoral laws | React |
-| 🎯 **Knowledge Quiz** | 5-question gamified quiz with instant scoring | React, jsPDF |
-| 📄 **PDF Certificate** | Auto-generated "Informed Voter" certificate for quiz completers | jsPDF |
-| 💬 **AI Chat Assistant** | Real-time conversational AI powered by Groq's LLaMA 3.3 70B model, election-scoped | Groq API |
-| 🆘 **Help & Support** | ECI helplines, FAQ, and direct support contacts | React |
-
----
-
-## 🛠️ Tech Stack
-
-### Frontend (React App — `src/`)
-
-| Layer | Technology |
-|---|---|
-| **Framework** | React 18.3 + TypeScript 5.5 |
-| **Bundler** | Vite 6.3 |
-| **Routing** | React Router v7 |
-| **Styling** | Tailwind CSS v4 + shadcn/ui components |
-| **Animations** | Framer Motion (via `motion` package) |
-| **Icons** | Lucide React |
-| **AI Chat** | Groq API (`llama-3.3-70b-versatile`) |
-| **Certificate** | jsPDF |
-
-### Backend (Streamlit App — `app.py`)
-
-| Layer | Technology |
-|---|---|
-| **Framework** | Streamlit |
-| **Maps** | Folium + streamlit-folium |
-| **AI Integration** | Groq API (`llama-3.1-8b-instant`) via OpenAI-compatible client |
-| **Certificate** | jsPDF (injected via HTML) |
-
-### Infrastructure
-
-| Layer | Technology |
-|---|---|
-| **Containerization** | Docker |
-| **Deployment** | Google Cloud Run |
-| **CI/CD** | Google Cloud Build |
-
----
-
-## 📁 Project Structure
-
-```
-VoteSahayak/
-├── 📂 src/
-│   ├── 📂 app/
-│   │   ├── 📂 components/
-│   │   │   └── 📂 ui/          # shadcn/ui components (Button, Card, etc.)
-│   │   ├── 📂 pages/
-│   │   │   ├── Journey.tsx      # Voter step-by-step guide
-│   │   │   ├── Locator.tsx      # Polling station map
-│   │   │   ├── Timeline.tsx     # Election calendar
-│   │   │   ├── Candidates.tsx   # Candidate information
-│   │   │   ├── Education.tsx    # Civic education resources
-│   │   │   ├── Quiz.tsx         # Knowledge quiz + certificate
-│   │   │   ├── Chat.tsx         # AI chatbot (Groq-powered)
-│   │   │   └── Support.tsx      # Help & contact info
-│   │   ├── App.tsx              # Root component
-│   │   ├── layout.tsx           # Sidebar navigation layout
-│   │   └── routes.tsx           # React Router definitions
-│   ├── 📂 styles/
-│   │   ├── index.css            # Entry CSS (imports below)
-│   │   ├── tailwind.css         # Tailwind v4 setup
-│   │   ├── theme.css            # shadcn design tokens + @theme
-│   │   └── fonts.css            # Google Fonts
-│   └── main.tsx                 # React entry point
-│
-├── app.py                       # Streamlit backend application
-├── Dockerfile                   # Container definition
-├── requirements.txt             # Python dependencies
-├── vite.config.ts               # Vite + Tailwind v4 config
-├── package.json                 # Node.js dependencies
-├── default_shadcn_theme.css     # shadcn theme reference file
-└── .env.example                 # Environment variable template
-```
-
----
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- **Node.js** 18+ and **npm** / **pnpm**
-- **Python** 3.8+
-- **Groq API Key** (free at [console.groq.com](https://console.groq.com/))
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/nafisalam72/VoteSahayak.git
-cd VoteSahayak
-```
-
-### 2. Set Up Environment Variables
-
-```bash
-cp .env.example .env
-# Edit .env and add your Groq API key:
-# VITE_GROQ_API_KEY=your_key_here
-# GROQ_API_KEY=your_key_here
-```
-
-### 3. Run the React Frontend
+## Local Development
 
 ```bash
 npm install
+cp .env.example .env
+npm run dev:server
+```
+
+In a second terminal:
+
+```bash
 npm run dev
-# App available at http://localhost:5173
 ```
 
-### 4. Run the Streamlit Backend (Optional)
+The Vite dev server proxies `/api/*` to `http://localhost:8080`.
+
+## Tests And Build
 
 ```bash
-pip install -r requirements.txt
-streamlit run app.py
-# App available at http://localhost:8501
+npm run typecheck
+npm test
+npm run build
 ```
 
-### 5. Run with Docker
+## Required Environment Variables
+
+Set these on Cloud Run or in `.env` for local server testing:
 
 ```bash
-docker build -t votesahayak .
-docker run -p 8501:8501 -e GROQ_API_KEY=your_key votesahayak
+GROQ_API_KEY=your_server_side_key
+GROQ_MODEL=llama-3.3-70b-versatile
+PORT=8080
+RATE_LIMIT_MAX=120
+CHAT_RATE_LIMIT_MAX=12
+CACHE_TTL_MS=300000
 ```
 
----
-
-## ☁️ Deployment (Google Cloud Run)
+Optional Firebase Auth:
 
 ```bash
-# Authenticate
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
+ENABLE_FIREBASE_AUTH=true
+REQUIRE_AUTH=false
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_WEB_API_KEY=your_public_firebase_api_key
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_WEB_APP_ID=your_public_firebase_app_id
+FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=your_public_sender_id
+FIREBASE_MEASUREMENT_ID=your_public_measurement_id
+```
 
-# Build and deploy
-gcloud run deploy votesahayak \
-  --source . \
-  --region asia-south1 \
+Set `REQUIRE_AUTH=true` only after Google sign-in works end to end.
+
+Your current Firebase web app values:
+
+```bash
+FIREBASE_PROJECT_ID=election-9ad36
+FIREBASE_WEB_API_KEY=AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y
+FIREBASE_AUTH_DOMAIN=election-9ad36.firebaseapp.com
+FIREBASE_WEB_APP_ID=1:495082661814:web:8401b6b65a8630914e8317
+FIREBASE_STORAGE_BUCKET=election-9ad36.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=495082661814
+FIREBASE_MEASUREMENT_ID=G-KL9HM4G1L9
+```
+
+## Cloud Run Deployment
+
+```bash
+PROJECT_ID=your-project-id
+REGION=asia-south1
+SERVICE=votesahayak
+REPO=votesahayak
+
+gcloud config set project $PROJECT_ID
+gcloud services enable run.googleapis.com artifactregistry.googleapis.com cloudbuild.googleapis.com secretmanager.googleapis.com logging.googleapis.com monitoring.googleapis.com
+
+gcloud artifacts repositories create $REPO \
+  --repository-format=docker \
+  --location=$REGION
+
+gcloud secrets create groq-api-key --replication-policy=automatic
+printf "YOUR_GROQ_API_KEY" | gcloud secrets versions add groq-api-key --data-file=-
+
+gcloud iam service-accounts create votesahayak-runner \
+  --display-name="VoteSahayak Cloud Run runtime"
+
+gcloud secrets add-iam-policy-binding groq-api-key \
+  --member="serviceAccount:votesahayak-runner@$PROJECT_ID.iam.gserviceaccount.com" \
+  --role="roles/secretmanager.secretAccessor"
+
+gcloud builds submit \
+  --tag $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$SERVICE:latest
+
+gcloud run deploy $SERVICE \
+  --image $REGION-docker.pkg.dev/$PROJECT_ID/$REPO/$SERVICE:latest \
+  --region $REGION \
+  --platform managed \
   --allow-unauthenticated \
-  --set-env-vars GROQ_API_KEY=your_key
+  --service-account votesahayak-runner@$PROJECT_ID.iam.gserviceaccount.com \
+  --port 8080 \
+  --concurrency 80 \
+  --memory 512Mi \
+  --cpu 1 \
+  --min-instances 0 \
+  --max-instances 10 \
+  --timeout 60 \
+  --set-secrets GROQ_API_KEY=groq-api-key:latest \
+  --set-env-vars NODE_ENV=production,ENABLE_FIREBASE_AUTH=true,REQUIRE_AUTH=false,FIREBASE_PROJECT_ID=election-9ad36,FIREBASE_WEB_API_KEY=AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y,FIREBASE_AUTH_DOMAIN=election-9ad36.firebaseapp.com,FIREBASE_WEB_APP_ID=1:495082661814:web:8401b6b65a8630914e8317,FIREBASE_STORAGE_BUCKET=election-9ad36.firebasestorage.app,FIREBASE_MESSAGING_SENDER_ID=495082661814,FIREBASE_MEASUREMENT_ID=G-KL9HM4G1L9,RATE_LIMIT_MAX=120,CHAT_RATE_LIMIT_MAX=12,CACHE_TTL_MS=300000
 ```
 
----
+## Monitoring
 
-## 🎨 Design System
+Use `/healthz` for uptime checks and `/readyz` for configuration visibility. The server emits JSON logs with `severity`, `service`, `requestId`, status, latency, and Cloud Trace correlation when Cloud Run supplies trace headers.
 
-The UI is built on a **premium dark theme** with Indian tricolor accents:
+## Least-Privilege IAM
 
-| Token | Color | Usage |
-|---|---|---|
-| Primary Accent | `#FF9933` (Saffron) | Headings, active states, CTAs |
-| Secondary Accent | `#046A38` (India Green) | Badges, success states |
-| Background | `#0A0F15` / `slate-950` | Main app background |
-| Surface | `#0F172A` / `slate-900` | Cards, sidebar, modals |
-| Typography | Inter (Google Fonts) | All text |
+The runtime service account should only need:
 
----
+- `roles/secretmanager.secretAccessor` on the `groq-api-key` secret.
+- Firebase permissions only if you enable server-side Firebase Admin verification.
+- No broad Editor, Owner, Storage Admin, or Cloud SQL roles unless you add those services later.
 
-## 📊 Data Coverage
+## Final-Attempt Checklist
 
-- **Districts Covered:** Kolkata, Howrah, South 24 Parganas, North 24 Parganas, Hooghly (West Bengal)
-- **Polling Stations:** 15 mock stations with GPS coordinates
-- **Election Events:** 6 key milestones (West Bengal Assembly Election 2026 mock data)
-- **Quiz Questions:** 5 core questions covering voting age, EVM, NOTA, ECI helpline, and registration
-
----
-
-## ⚠️ Disclaimer
-
-VoteSahayak is an **educational project** built for the PromptWars Hackathon. It is **not officially affiliated** with the Election Commission of India (ECI). Polling station data shown is for **demonstration purposes only**. For official information, visit [voters.eci.gov.in](https://voters.eci.gov.in/).
-
----
-
-## 📄 License
-
-This project is open source. See [ATTRIBUTIONS.md](ATTRIBUTIONS.md) for third-party credits.
-
----
-
-<div align="center">
-  <p>Made with ❤️ for Indian Democracy</p>
-  <p>
-    <a href="https://voters.eci.gov.in/">🗳️ ECI Voter Portal</a> &nbsp;|&nbsp;
-    <a href="https://console.groq.com/">🤖 Get Groq API Key</a> &nbsp;|&nbsp;
-    <strong>ECI Helpline: 1950</strong>
-  </p>
-</div>
+- Run `npm run typecheck`, `npm test`, and `npm run build` before deploying.
+- Confirm the deployed URL returns `200` for `/healthz` and `/readyz`.
+- Confirm browser DevTools does not contain `GROQ_API_KEY` or any AI key in bundled JS.
+- Add Firebase config and test Google sign-in before setting `REQUIRE_AUTH=true`.
+- Create a Cloud Monitoring uptime check for `/healthz` and an alert on HTTP 5xx logs.
+- Keep `.env`, service account JSON files, and local Firebase admin credentials out of Git.

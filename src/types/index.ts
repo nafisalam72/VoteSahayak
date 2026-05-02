@@ -120,3 +120,17 @@ export type ArticleEntry = {
   title: string;
   readTime: string;
 };
+
+// ---------------------------------------------------------------------------
+// Voting API
+// ---------------------------------------------------------------------------
+
+export type VoteRecord = {
+  candidateId: string;
+  votedAt: string;
+};
+
+export type VoteStatusResponse = {
+  hasVoted: boolean;
+  record: VoteRecord | null;
+};

@@ -14,7 +14,6 @@
 
 import React, { useState, useRef, useCallback, memo } from "react";
 import { motion } from "motion/react";
-import { jsPDF } from "jspdf";
 import {
   Award,
   CheckCircle,
@@ -150,7 +149,7 @@ interface QuizResultProps {
   /** Total number of questions in the quiz. */
   total: number;
   /** Callback to trigger PDF certificate download. */
-  onDownload: () => void;
+  onDownload: () => void | Promise<void>;
   /** Callback to reset the quiz to Q1. */
   onRetake: () => void;
 }
@@ -284,7 +283,8 @@ export default function Quiz() {
    * using jsPDF. The certificate includes the user's score, the current date,
    * and tricolour-inspired border styling.
    */
-  const generatePDF = useCallback(() => {
+  const generatePDF = useCallback(async () => {
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF("landscape");
 
     // Background — light saffron tint

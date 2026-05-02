@@ -115,7 +115,7 @@ export default function AuthGate({ children }: AuthGateProps) {
         <div className="flex items-center gap-3">
           <ShieldCheck className="h-5 w-5 shrink-0 text-green-400" aria-hidden="true" />
           <span className="max-w-48 truncate">
-            Signed in as {user.email || user.displayName || "Google user"}
+            Signed in as {user?.email || user?.displayName || "Google user"}
           </span>
           <button
             type="button"

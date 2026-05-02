@@ -31,13 +31,8 @@ The legacy `app.py` Streamlit app is retained as a safe local fallback, but Clou
 ```bash
 npm install
 cp .env.example .env
-npm run dev:server
-```
-
-In a second terminal:
-
-```bash
-npm run dev
+# Fill in your GROQ_API_KEY and Firebase values in .env
+npm run dev:all
 ```
 
 The Vite dev server proxies `/api/*` to `http://localhost:8080`.
@@ -52,44 +47,20 @@ npm run build
 
 ## Required Environment Variables
 
-Set these on Cloud Run or in `.env` for local server testing:
+For local development, copy `.env.example` to `.env` and fill in your values. For production (Cloud Run), use Secret Manager for sensitive keys.
 
-```bash
-GROQ_API_KEY=your_server_side_key
-GROQ_MODEL=llama-3.3-70b-versatile
-PORT=8080
-RATE_LIMIT_MAX=120
-CHAT_RATE_LIMIT_MAX=12
-CACHE_TTL_MS=300000
-```
+### Public Client Config (VITE_ prefixed)
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_MEASUREMENT_ID`
 
-Optional Firebase Auth:
-
-```bash
-ENABLE_FIREBASE_AUTH=true
-REQUIRE_AUTH=false
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_WEB_API_KEY=your_public_firebase_api_key
-FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-FIREBASE_WEB_APP_ID=your_public_firebase_app_id
-FIREBASE_STORAGE_BUCKET=your-project.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID=your_public_sender_id
-FIREBASE_MEASUREMENT_ID=your_public_measurement_id
-```
-
-Set `REQUIRE_AUTH=true` only after Google sign-in works end to end.
-
-Your current Firebase web app values:
-
-```bash
-FIREBASE_PROJECT_ID=election-9ad36
-FIREBASE_WEB_API_KEY=AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y
-FIREBASE_AUTH_DOMAIN=election-9ad36.firebaseapp.com
-FIREBASE_WEB_APP_ID=1:495082661814:web:8401b6b65a8630914e8317
-FIREBASE_STORAGE_BUCKET=election-9ad36.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID=495082661814
-FIREBASE_MEASUREMENT_ID=G-KL9HM4G1L9
-```
+### Server Secrets
+- `GROQ_API_KEY`: Required for the AI assistant.
+- `SESSION_SECRET`: Recommended for secure sessions.
 
 ## Cloud Run Deployment
 
@@ -133,7 +104,7 @@ gcloud run deploy $SERVICE \
   --max-instances 10 \
   --timeout 60 \
   --set-secrets GROQ_API_KEY=groq-api-key:latest \
-  --set-env-vars NODE_ENV=production,ENABLE_FIREBASE_AUTH=true,REQUIRE_AUTH=false,FIREBASE_PROJECT_ID=election-9ad36,FIREBASE_WEB_API_KEY=AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y,FIREBASE_AUTH_DOMAIN=election-9ad36.firebaseapp.com,FIREBASE_WEB_APP_ID=1:495082661814:web:8401b6b65a8630914e8317,FIREBASE_STORAGE_BUCKET=election-9ad36.firebasestorage.app,FIREBASE_MESSAGING_SENDER_ID=495082661814,FIREBASE_MEASUREMENT_ID=G-KL9HM4G1L9,RATE_LIMIT_MAX=120,CHAT_RATE_LIMIT_MAX=12,CACHE_TTL_MS=300000
+  --set-env-vars NODE_ENV=production,ENABLE_FIREBASE_AUTH=true,REQUIRE_AUTH=false,VITE_FIREBASE_PROJECT_ID=election-9ad36,VITE_FIREBASE_API_KEY=AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y,VITE_FIREBASE_AUTH_DOMAIN=election-9ad36.firebaseapp.com,VITE_FIREBASE_APP_ID=1:495082661814:web:8401b6b65a8630914e8317,VITE_FIREBASE_STORAGE_BUCKET=election-9ad36.firebasestorage.app,VITE_FIREBASE_MESSAGING_SENDER_ID=495082661814,VITE_FIREBASE_MEASUREMENT_ID=G-KL9HM4G1L9,RATE_LIMIT_MAX=120,CHAT_RATE_LIMIT_MAX=12,CACHE_TTL_MS=300000
 ```
 
 ## Monitoring

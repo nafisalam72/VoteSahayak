@@ -30,7 +30,10 @@ spec:
             - name: FIREBASE_PROJECT_ID
               value: election-9ad36
             - name: FIREBASE_WEB_API_KEY
-              value: AIzaSyDW22owRtHMDv5MGhLyHv-X9g21wOr09_Y
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-web-api-key
+                  key: latest
             - name: FIREBASE_AUTH_DOMAIN
               value: election-9ad36.firebaseapp.com
             - name: FIREBASE_WEB_APP_ID

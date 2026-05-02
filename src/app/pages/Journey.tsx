@@ -84,8 +84,8 @@ export default function Journey() {
               <step.icon className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-xl font-semibold text-slate-200 mb-2">Step {step.id}</h3>
-              <h4 className="text-lg font-medium text-slate-300 mb-2">{step.title}</h4>
+              <h2 className="text-xl font-semibold text-slate-200 mb-2">Step {step.id}</h2>
+              <h3 className="text-lg font-medium text-slate-300 mb-2">{step.title}</h3>
               <p className="text-sm text-slate-400 leading-relaxed">{step.description}</p>
             </div>
           </motion.article>

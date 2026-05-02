@@ -132,6 +132,14 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-950 text-slate-100">
+      {/* Skip to Content Link */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only fixed top-4 left-4 z-[100] px-4 py-2 bg-orange-500 text-white rounded-lg font-bold"
+      >
+        Skip to content
+      </a>
+
       {/* Mobile Sidebar Overlay */}
       <AnimatePresence>
         {isOpen && (
@@ -211,7 +219,10 @@ export default function Layout() {
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden bg-[#0A0F15] relative">
+      <main
+        id="main-content"
+        className="flex-1 flex flex-col h-full overflow-hidden bg-[#0A0F15] relative"
+      >
         {/* Top header */}
         <header className="h-16 flex items-center gap-4 px-6 bg-slate-900/50 backdrop-blur-md border-b border-slate-800/50 sticky top-0 z-30 shrink-0">
           <button

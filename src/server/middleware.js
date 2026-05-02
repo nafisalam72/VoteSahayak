@@ -1,60 +1,66 @@
-import crypto from "node:crypto";
-import compression from "compression";
+/**
+ * @file server/middleware.js
+ * @description Security and Logging middleware.
+ */
+
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
-import { config } from "./config.js";
+import compression from "compression";
+import { rateLimit } from "express-rate-limit";
+import winston from "winston";
+import { LoggingWinston } from "@google-cloud/logging-winston";
+
+const createLoggingTransport = () => {
+  try {
+    const lw = new LoggingWinston();
+    // Prevent transport errors from crashing the process
+    lw.on("error", (err) => {
+      process.stderr.write(`Logging transport error: ${err.message}\n`);
+    });
+    return lw;
+  } catch (e) {
+    return null;
+  }
+};
+
+const getTransports = () => {
+  const t = [new winston.transports.Console()];
+  const lw = createLoggingTransport();
+  if (lw) t.push(lw);
+  return t;
+};
+
+const logger = winston.createLogger({
+  level: "info",
+  transports: getTransports(),
+});
 
 export const setupSecurity = (app) => {
   app.use(helmet({
-    crossOriginEmbedderPolicy: false,
     contentSecurityPolicy: {
-      useDefaults: true,
       directives: {
-        "default-src": ["'self'"],
-        "script-src": ["'self'"],
-        "style-src": ["'self'", "'unsafe-inline'"],
-        "img-src": ["'self'", "data:", "https:"],
-        "font-src": ["'self'", "data:", "https:"],
-        "connect-src": ["'self'", "https://identitytoolkit.googleapis.com", "https://securetoken.googleapis.com", "https://www.googleapis.com"],
-        "frame-ancestors": ["'none'"],
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "script-src": ["'self'", "'unsafe-inline'"],
+        "connect-src": ["'self'", "*.googleapis.com", "https://api.groq.com"],
       },
     },
   }));
 };
 
-export const setupCompression = (app) => {
-  app.use(compression());
-};
-
-const cloudTraceName = (req) => {
-  const traceHeader = req.get("x-cloud-trace-context");
-  if (!traceHeader || !config.firebase.projectId) return undefined;
-  return `projects/${config.firebase.projectId}/traces/${traceHeader.split("/")[0]}`;
-};
+export const setupCompression = (app) => app.use(compression());
 
 export const createLogger = () => (req, res, next) => {
-  req.id = crypto.randomUUID();
-  const start = process.hrtime.bigint();
+  const start = Date.now();
   res.on("finish", () => {
-    const duration = Number(process.hrtime.bigint() - start) / 1e6;
-    process.stdout.write(JSON.stringify({
-      severity: res.statusCode >= 400 ? "WARNING" : "INFO",
-      message: "HTTP Request",
-      method: req.method,
-      path: req.path,
-      status: res.statusCode,
-      durationMs: Math.round(duration),
-      trace: cloudTraceName(req),
-    }) + "\n");
+    logger.info("HTTP Request", {
+      method: req.method, path: req.path,
+      status: res.statusCode, durationMs: Date.now() - start,
+    });
   });
   next();
 };
 
-export const createLimiter = (limit, windowMs = config.limits.rateLimitWindowMs) => 
-  rateLimit({
-    windowMs,
-    limit,
-    standardHeaders: "draft-7",
-    legacyHeaders: false,
-    message: { error: "Too many requests", code: "rate_limited" },
-  });
+export const createLimiter = (max) => rateLimit({
+  windowMs: 60 * 1000, max,
+  message: { error: "Too many requests" },
+  standardHeaders: true, legacyHeaders: false,
+});

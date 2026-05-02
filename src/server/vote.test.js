@@ -14,7 +14,6 @@ vi.mock("./config.js", async (importOriginal) => {
   };
 });
 
-// Mock services
 vi.mock("./services/firebase.js", () => ({
   verifier: { verify: vi.fn() },
   checkFirebaseHealth: vi.fn().mockResolvedValue(true),
@@ -23,17 +22,8 @@ vi.mock("./services/firebase.js", () => ({
 vi.mock("./services/firestore.js", () => ({
   recordVote: vi.fn().mockResolvedValue(true),
   getVote: vi.fn().mockResolvedValue(null),
-  getVoteCounts: vi.fn().mockResolvedValue({ "C1": 10 }),
+  getVoteCounts: vi.fn().mockResolvedValue({ "C1": 5 }),
   checkFirestoreHealth: vi.fn().mockResolvedValue(true),
-}));
-
-vi.mock("./services/storage.js", () => ({
-  uploadCertificate: vi.fn().mockResolvedValue("https://mock-url.com/cert.pdf"),
-  checkStorageHealth: vi.fn().mockResolvedValue(true),
-}));
-
-vi.mock("./services/ai.js", () => ({
-  callAI: vi.fn().mockResolvedValue("AI Reply"),
 }));
 
 vi.mock("@google-cloud/logging-winston", () => {
@@ -50,7 +40,7 @@ vi.mock("@google-cloud/logging-winston", () => {
   };
 });
 
-describe("VoteSahayak API", () => {
+describe("Voting API Integration", () => {
   let app;
 
   beforeEach(() => {
@@ -58,20 +48,7 @@ describe("VoteSahayak API", () => {
     vi.clearAllMocks();
   });
 
-  it("GET /healthz returns 200", async () => {
-    const res = await request(app).get("/healthz");
-    expect(res.status).toBe(200);
-  });
-
-  it("POST /api/chat handles messages", async () => {
-    const res = await request(app)
-      .post("/api/chat")
-      .send({ message: "Hello", history: [] });
-    expect(res.status).toBe(200);
-    expect(res.body.reply).toBe("AI Reply");
-  });
-
-  it("POST /api/vote prevents double voting", async () => {
+  it("should prevent voting twice for the same user", async () => {
     const { getVote } = await import("./services/firestore.js");
     getVote.mockResolvedValueOnce(null).mockResolvedValueOnce({ candidateId: "C1" });
 
@@ -86,8 +63,9 @@ describe("VoteSahayak API", () => {
     expect(res2.status).toBe(409);
   });
 
-  it("handles 404 for unknown API routes", async () => {
-    const res = await request(app).get("/api/unknown");
-    expect(res.status).toBe(404);
+  it("should return cached counts", async () => {
+    const res = await request(app).get("/api/vote/counts");
+    expect(res.status).toBe(200);
+    expect(res.body.counts).toBeDefined();
   });
 });

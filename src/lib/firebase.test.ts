@@ -1,24 +1,76 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { getFirebaseClientConfig } from "./firebase";
+import * as firebase from "./firebase";
 
-describe("Firebase Client Config", () => {
-  beforeEach(() => {
-    vi.resetModules();
-    // Clear environment variables
-    delete process.env.VITE_FIREBASE_API_KEY;
-  });
+// Mock global fetch for config
+vi.stubGlobal("fetch", vi.fn(() =>
+  Promise.resolve({
+    ok: true,
+    json: () => Promise.resolve({
+      firebase: {
+        apiKey: "test", authDomain: "test", projectId: "test", appId: "test"
+      }
+    }),
+  })
+));
 
-  it("should return null if config is missing", async () => {
-    const config = await getFirebaseClientConfig();
-    // Assuming no env vars are set in the test environment by default
-    if (!config) {
-      expect(config).toBeNull();
+// Mock Firebase SDKs
+vi.mock("firebase/app", () => ({
+  initializeApp: vi.fn(() => ({})),
+  getApps: vi.fn(() => []),
+}));
+
+vi.mock("firebase/auth", () => {
+  const authInstance = {
+    currentUser: {
+      getIdToken: vi.fn().mockResolvedValue("mock-token")
     }
+  };
+  class MockProvider {
+    setCustomParameters = vi.fn();
+  }
+  return {
+    getAuth: vi.fn(() => authInstance),
+    GoogleAuthProvider: MockProvider,
+    onAuthStateChanged: vi.fn((_, cb) => {
+      cb(null);
+      return vi.fn();
+    }),
+    signInWithPopup: vi.fn(),
+    signOut: vi.fn(),
+  };
+});
+
+vi.mock("firebase/analytics", () => ({
+  getAnalytics: vi.fn(),
+  isSupported: vi.fn(() => Promise.resolve(true)),
+}));
+
+describe("Firebase Library", () => {
+  it("getFirebaseClientConfig returns config", async () => {
+    expect(await firebase.getFirebaseClientConfig()).toBeDefined();
   });
 
-  it("should parse VITE_FIREBASE_CONFIG if present", async () => {
-    // This is hard to test due to import.meta.env, but we can verify the fallback logic
-    const config = await getFirebaseClientConfig();
-    expect(config === null || typeof config === 'object').toBe(true);
+  it("hasFirebaseClientConfig works", async () => {
+    expect(await firebase.hasFirebaseClientConfig()).toBe(true);
+  });
+
+  it("initializeFirebaseAnalytics works", async () => {
+    await firebase.initializeFirebaseAnalytics();
+  });
+
+  it("subscribeToAuthState works", async () => {
+    const unsub = await firebase.subscribeToAuthState(() => {});
+    expect(unsub).toBeDefined();
+    unsub();
+  });
+
+  it("signInWithGoogle and signOutCurrentUser work", async () => {
+    await firebase.signInWithGoogle();
+    await firebase.signOutCurrentUser();
+  });
+
+  it("getCurrentIdToken returns token", async () => {
+    const token = await firebase.getCurrentIdToken();
+    expect(token).toBe("mock-token");
   });
 });

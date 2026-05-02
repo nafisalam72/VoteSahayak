@@ -1,22 +1,12 @@
 /**
  * @file App.tsx
- * @description Root application component for VoteSahayak.
- *
- * Renders the top-level container with global styling tokens and injects
- * the React Router {@link RouterProvider} to handle all client-side routing.
- * The `bg-slate-950` background and `text-slate-100` foreground establish the
- * app's dark theme across every page.
+ * @description Root application component — AuthGate removed, auth is now route-level.
  */
 
+import React from "react";
 import { RouterProvider } from "react-router";
-import AuthGate from "./components/AuthGate";
 import { router } from "./routes";
 
-/**
- * Root `App` component — the entry point rendered by `main.tsx`.
- *
- * @returns The full application wrapped in a themed container and router.
- */
 export default function App() {
   return (
     <div
@@ -29,9 +19,7 @@ export default function App() {
       >
         Skip to main content
       </a>
-      <AuthGate>
-        <RouterProvider router={router} />
-      </AuthGate>
+      <RouterProvider router={router} />
     </div>
   );
 }

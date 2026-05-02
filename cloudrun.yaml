@@ -3,54 +3,32 @@ kind: Service
 metadata:
   name: votesahayak
   annotations:
-    run.googleapis.com/ingress: all
+    run.googleapis.com/client-name: gcloud
 spec:
   template:
     metadata:
       annotations:
         autoscaling.knative.dev/minScale: "0"
         autoscaling.knative.dev/maxScale: "10"
-        run.googleapis.com/cpu-throttling: "true"
     spec:
       containerConcurrency: 80
-      timeoutSeconds: 60
-      serviceAccountName: votesahayak-runner@PROJECT_ID.iam.gserviceaccount.com
       containers:
-        - image: REGION-docker.pkg.dev/PROJECT_ID/votesahayak/votesahayak:latest
-          ports:
-            - name: http1
-              containerPort: 8080
+        - image: gcr.io/PROJECT_ID/votesahayak
+          resources:
+            limits:
+              cpu: "2"
+              memory: 1Gi
           env:
             - name: NODE_ENV
               value: production
-            - name: ENABLE_FIREBASE_AUTH
-              value: "true"
-            - name: REQUIRE_AUTH
-              value: "false"
-            - name: FIREBASE_PROJECT_ID
-              value: election-9ad36
             - name: FIREBASE_WEB_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: firebase-web-api-key
                   key: latest
-            - name: FIREBASE_AUTH_DOMAIN
-              value: election-9ad36.firebaseapp.com
-            - name: FIREBASE_WEB_APP_ID
-              value: 1:495082661814:web:8401b6b65a8630914e8317
-            - name: FIREBASE_STORAGE_BUCKET
-              value: election-9ad36.firebasestorage.app
-            - name: FIREBASE_MESSAGING_SENDER_ID
-              value: "495082661814"
-            - name: FIREBASE_MEASUREMENT_ID
-              value: G-KL9HM4G1L9
-            - name: RATE_LIMIT_MAX
-              value: "120"
-            - name: CHAT_RATE_LIMIT_MAX
-              value: "12"
-            - name: CACHE_TTL_MS
-              value: "300000"
-          resources:
-            limits:
-              cpu: "1"
-              memory: 512Mi
+            - name: FIREBASE_PROJECT_ID
+              value: YOUR_PROJECT_ID
+            - name: GOOGLE_CLOUD_STORAGE_BUCKET
+              value: YOUR_PROJECT_ID-certificates
+          ports:
+            - containerPort: 8080

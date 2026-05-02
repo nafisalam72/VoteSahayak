@@ -1,25 +1,32 @@
 # Stage 1: Build
-FROM node:22-alpine AS builder
+FROM node:20-alpine AS builder
+
 WORKDIR /app
+
+# Install dependencies for building
 COPY package*.json ./
 RUN npm ci
+
+# Copy source and build frontend
 COPY . .
 RUN npm run build
 
-# Stage 2: Runtime
-FROM gcr.io/distroless/nodejs22-debian12 AS runtime
-ENV NODE_ENV=production
+# Stage 2: Production
+FROM node:20-alpine
+
 WORKDIR /app
 
-# Copy production dependencies
+# Set production environment
+ENV NODE_ENV=production
+
+# Install only production dependencies
 COPY package*.json ./
-COPY --from=builder /app/node_modules ./node_modules
+RUN npm ci --omit=dev
 
-# Copy application code
+# Copy build artifacts and server source
 COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/src/server ./src/server
-COPY server.js ./server.js
+COPY . .
 
+# Expose port and run
 EXPOSE 8080
-USER 1000
-CMD ["server.js"]
+CMD ["node", "server.js"]

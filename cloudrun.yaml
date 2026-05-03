@@ -13,7 +13,7 @@ spec:
     spec:
       containerConcurrency: 80
       containers:
-        - image: gcr.io/PROJECT_ID/votesahayak
+        - image: us-central1-docker.pkg.dev/prompt-495020/votesahayak-docker/votesahayak
           resources:
             limits:
               cpu: "2"
@@ -26,9 +26,43 @@ spec:
                 secretKeyRef:
                   name: firebase-web-api-key
                   key: latest
+            - name: VITE_FIREBASE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-web-api-key
+                  key: latest
             - name: FIREBASE_PROJECT_ID
-              value: YOUR_PROJECT_ID
+              value: election-9ad36
+            - name: VITE_FIREBASE_PROJECT_ID
+              value: election-9ad36
+            - name: FIREBASE_AUTH_DOMAIN
+              value: election-9ad36.firebaseapp.com
+            - name: VITE_FIREBASE_AUTH_DOMAIN
+              value: election-9ad36.firebaseapp.com
+            - name: FIREBASE_STORAGE_BUCKET
+              value: election-9ad36.firebasestorage.app
+            - name: VITE_FIREBASE_STORAGE_BUCKET
+              value: election-9ad36.firebasestorage.app
+            - name: FIREBASE_WEB_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-web-app-id
+                  key: latest
+            - name: VITE_FIREBASE_APP_ID
+              valueFrom:
+                secretKeyRef:
+                  name: firebase-web-app-id
+                  key: latest
             - name: GOOGLE_CLOUD_STORAGE_BUCKET
-              value: YOUR_PROJECT_ID-certificates
+              value: election-9ad36-certificates
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: groq-api-key
+                  key: latest
+            - name: ENABLE_FIREBASE_AUTH
+              value: "true"
+            - name: REQUIRE_AUTH
+              value: "true"
           ports:
             - containerPort: 8080

@@ -49,8 +49,18 @@ function getFriendlyApiError(status: number, response?: ChatApiResponse): string
     return "You have reached the chat rate limit. Please wait a minute and try again.";
   }
 
-  if (status === 503 && response?.code === "ai_not_configured") {
-    return "The AI assistant is not configured on the server yet.";
+  if (status === 503) {
+    if (response?.code === "ai_not_configured") {
+      return "The AI assistant is not configured on the server yet. Please contact support.";
+    }
+    if (response?.code === "ai_auth_error") {
+      return "AI service authentication failed. Please contact support to verify credentials.";
+    }
+    return "The AI service is temporarily unavailable. Please try again later.";
+  }
+
+  if (status === 504) {
+    return "AI service request timed out. Please try a shorter question.";
   }
 
   return response?.error || "Sorry, I could not connect to the AI assistant right now.";

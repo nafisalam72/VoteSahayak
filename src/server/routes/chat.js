@@ -30,6 +30,37 @@ router.post("/", createLimiter(config.limits.chatRateLimitMax), async (req, res,
     chatCache.set(cacheKey, reply);
     res.json({ reply, cached: false });
   } catch (error) {
+    console.error("Chat API Error:", error);
+    
+    // Handle specific error types
+    if (error.code === "ai_not_configured") {
+      return res.status(503).json({ 
+        error: "AI service is not configured on the server",
+        code: "ai_not_configured"
+      });
+    }
+    
+    if (error.code === "ai_auth_error") {
+      return res.status(503).json({ 
+        error: "AI service authentication failed. Please contact support.",
+        code: "ai_auth_error"
+      });
+    }
+    
+    if (error.code === "ai_rate_limit") {
+      return res.status(429).json({ 
+        error: "AI service rate limit exceeded",
+        code: "ai_rate_limit"
+      });
+    }
+    
+    if (error.code === "ai_timeout") {
+      return res.status(504).json({ 
+        error: "AI service request timed out",
+        code: "ai_timeout"
+      });
+    }
+    
     next(error);
   }
 });

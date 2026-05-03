@@ -26,6 +26,8 @@ function parseFirebaseError(code: string): string {
     "auth/too-many-requests":    "Too many attempts. Please wait a moment.",
     "auth/invalid-credential":   "Invalid email or password. Please try again.",
     "auth/network-request-failed": "Network error. Check your connection.",
+    "auth/internal-error":       "Firebase service is temporarily unavailable. Please check your internet connection and try again.",
+    "auth/operation-not-allowed": "Email/password sign-in is not enabled. Please contact support.",
   };
   return map[code] ?? "Something went wrong. Please try again.";
 }
@@ -51,7 +53,12 @@ export default function Login() {
     try { await signInWithGoogle(); }
     catch (e: any) { 
       console.error("Full Login Error:", e);
-      const msg = e.code ? `[${e.code}] ${e.message}` : `Error: ${e.message || JSON.stringify(e)}`;
+      // Extract error code from Firebase error or custom message
+      let code = e.code;
+      if (!code && e.message && e.message.includes("auth/")) {
+        code = e.message.split(": ")[0];
+      }
+      const msg = code ? `[${code}] ${parseFirebaseError(code)}` : `Error: ${e.message || JSON.stringify(e)}`;
       setError(msg); 
       setPhase("idle"); 
     }
@@ -67,7 +74,11 @@ export default function Login() {
       else await signUpWithEmail(email, password);
       // onAuthStateChanged in GuestOnly will redirect to /
     } catch (err: any) {
-      setError(parseFirebaseError(err?.code ?? ""));
+      let code = err?.code;
+      if (!code && err?.message && err.message.includes("auth/")) {
+        code = err.message.split(": ")[0];
+      }
+      setError(parseFirebaseError(code ?? ""));
       setPhase("idle");
     }
   };

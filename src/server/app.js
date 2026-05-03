@@ -41,7 +41,15 @@ const setupHealthRoutes = (app) => {
 };
 
 const setupAPIRoutes = (app) => {
-  app.get("/api/config", (req, res) => res.json({ firebase: config.firebase }));
+  app.get("/api/health", (req, res) => res.json({ status: "Server is running perfectly!" }));
+  app.get("/api/config", (req, res) => {
+    const hasValidConfig = config.firebase.projectId && config.firebase.apiKey && config.firebase.authDomain && config.firebase.appId;
+    console.log("Serving frontend config for project:", config.firebase.projectId || "(missing)");
+    if (!hasValidConfig) {
+      console.warn("Firebase config is incomplete! Missing required fields.");
+    }
+    res.json({ firebase: config.firebase });
+  });
   app.use("/api/chat", authMiddleware, chatRoutes);
   app.use("/api/vote", (req, res, next) => {
     if (req.path === "/counts" && req.method === "GET") return next();
